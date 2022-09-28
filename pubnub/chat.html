@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Publish Subscribe Tutorial</title>
+  </head>
+  <body>
+    <input type="text" id="chatmessage" />
+    <input id="publish-button" type="submit" value="Click here to publish" />
+  </body>
+  <script>
+    src = "https://cdn.pubnub.com/sdk/javascript/pubnub.7.1.2.min.js";
+  </script>
+  <script>
+    const uuid = PubNub.generateUUID();
+    const pubnub = new PubNub({
+      publishKey: "pub-c-349ae42d-a38b-4564-b5c7-b9f46f97bf8a",
+      subscribeKey: "sub-c-f87f164f-51a5-4eea-9aef-826c9df49bc3",
+      uuid: uuid,
+    });
+    const button = document.getElementById("publish-button");
+    button.addEventListener("click", () => {
+      pubnub.publish(
+        {
+          channel: "hello_world",
+          message: {
+            sender: uuid,
+            content: document.getElementById("chatmessage").value,
+          },
+        },
+        function (status, response) {}
+      );
+    });
+
+    pubnub.subscribe({
+      channel: ["hello_world"],
+      withPresence: true,
+    });
+    pubnub.addListener({
+      message: function (event) {
+        let pElement = document.createElement("p");
+        pElement.appendChild(document.createTextNode(event.message.content));
+        document.body.appendChild(pElement);
+      },
+    });
+    pubnub.history(
+      {
+        channel: "hello_world",
+        count: 10,
+        stringifiedTimeToken: true,
+      },
+      function (status, response) {}
+    );
+  </script>
+</html>
